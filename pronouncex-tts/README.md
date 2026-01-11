@@ -170,9 +170,34 @@ python3 scripts/golden_regression.py --update-baseline --out-json /tmp/golden.js
 
 Baseline file: `artifacts/golden_baseline.json`.
 
+## CI env vars
+
+Golden + soak runs expect these environment variables:
+
+- `PRONOUNCEX_TTS_REDIS_URL` (e.g., `redis://127.0.0.1:6379/0`)
+- `PRONOUNCEX_TTS_MODEL_ALLOWLIST`
+- `PRONOUNCEX_TTS_MODEL_ID_DEFAULT`
+- `PRONOUNCEX_TTS_MODEL_ID_QUALITY`
+- `GOLDEN_MIN_WORKERS` (optional; defaults to 0)
+
 ## Status endpoint
 
 `GET /v1/admin/status` returns a compact snapshot (queue depth, workers online, retries, fallback usage, merge lock contention). It contains no request text or PII.
+
+## Soak test
+
+Run a 10–20 minute soak:
+
+```bash
+python3 scripts/soak_test.py --duration-seconds 900 --out-json /tmp/soak.json
+```
+
+Useful overrides:
+
+- `SOAK_DURATION_SECONDS`
+- `SOAK_CANCEL_EVERY`
+- `SOAK_MAX_MERGE_WAIT_TOTAL_MS`
+- `SOAK_MAX_MERGE_WAIT_MAX_MS`
 
 ## Scaling with Redis
 

@@ -6,24 +6,18 @@ on:
 
 jobs:
   golden:
-    runs-on: ubuntu-latest
-
-    services:
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 30
+    runs-on: [self-hosted, docker, pronouncex]
 
     env:
       PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker sanity
+        run: |
+          docker version
+          docker ps
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -72,8 +66,27 @@ jobs:
       - name: Run golden regression
         run: |
           set -euxo pipefail
-          # Prefer the script directly (less Makefile assumptions in CI)
-          python scripts/golden_regression.py --api-base http://127.0.0.1:8000 --min-workers 2 --status-delay 1
+          make golden
+          cp /tmp/golden.json golden.json
+
+      - name: Enforce golden.json checks
+        run: |
+          python3 - <<'PY'
+          import json
+          with open("golden.json", "r", encoding="utf-8") as handle:
+              data = json.load(handle)
+          errors = []
+          if data.get("pass") is not True:
+              errors.append("pass != true")
+          if data.get("perf_pass") is not True:
+              errors.append("perf_pass != true")
+          status_end = data.get("status_end") or {}
+          if status_end.get("active_jobs") not in (0, "0"):
+              errors.append("status_end.active_jobs != 0")
+          if errors:
+              raise SystemExit("Golden checks failed: " + ", ".join(errors))
+          print("Golden checks passed")
+          PY
 
       - name: Upload golden.json
         uses: actions/upload-artifact@v4
