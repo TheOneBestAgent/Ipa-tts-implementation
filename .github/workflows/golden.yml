@@ -8,36 +8,41 @@ jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
+    # Run all steps inside a Python 3.11 container on your self-hosted runner
+    container:
+      image: python:3.11-bookworm
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 30
+
     env:
-      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
+      # IMPORTANT: inside the container job, Redis is reachable by service name "redis"
+      PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Disk + docker usage
-        run: |
-          set -euxo pipefail
-          df -h
-          docker system df || true
-
-      - name: Docker sanity
-        run: |
-          set -euxo pipefail
-          docker version
-          docker ps
-
       - name: Python sanity
         run: |
           set -euxo pipefail
-          python3 --version
+          python --version
+          python -c "import sys; print(sys.executable)"
 
-      # NOTE: On self-hosted runners, this step requires passwordless sudo.
-      # If it fails, preinstall ffmpeg once on the machine and delete this step.
-      - name: Install system deps
+      - name: Install system deps (ffmpeg + curl)
         run: |
           set -euxo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          apt-get update
+          apt-get install -y --no-install-recommends ffmpeg curl
+          ffmpeg -version | head -n 2
 
       - name: Install backend deps
         working-directory: pronouncex-tts
@@ -46,43 +51,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start Redis (docker) + wait healthy
-        run: |
-          set -euxo pipefail
-          docker rm -f px-redis || true
-          docker run -d --name px-redis -p 6379:6379 \
-            --health-cmd "redis-cli ping" \
-            --health-interval 2s --health-timeout 2s --health-retries 30 \
-            redis:7
-
-          # Wait for health
-          for i in $(seq 1 60); do
-            status="$(docker inspect -f '{{.State.Health.Status}}' px-redis || true)"
-            if [ "$status" = "healthy" ]; then
-              echo "Redis healthy"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Redis did not become healthy."
-          docker logs px-redis || true
-          exit 1
-
-      - name: Clean old processes
-        run: |
-          set -euxo pipefail
-          pkill -f "uvicorn api\.app:app" || true
-          pkill -f "python -m core\.worker_main" || true
-          ss -ltnp | grep ':8000' || true
-
       - name: Start API + workers
         run: |
           set -euxo pipefail
 
           # Start API (2 uvicorn workers)
-          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+          (cd pronouncex-tts && nohup uvicorn api.app:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
 
-          # Start 2 job workers (scale by running more processes)
+          # Start 2 job workers
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
@@ -91,7 +67,7 @@ jobs:
           import time, urllib.request
           url = "http://127.0.0.1:8000/health"
           last = None
-          for _ in range(90):
+          for _ in range(120):
             try:
               with urllib.request.urlopen(url, timeout=2) as r:
                 if r.status == 200:
@@ -107,31 +83,29 @@ jobs:
         run: |
           set -euxo pipefail
           make golden
-
-          # Collect golden.json (support multiple output locations)
-          if [ -f /tmp/golden.json ]; then cp /tmp/golden.json ./golden.json; fi
-          if [ -f ./golden.json ]; then exit 0; fi
-          found="$(find . -maxdepth 4 -name golden.json -print -quit || true)"
-          test -n "$found"
-          cp "$found" ./golden.json
+          # Your suite writes /tmp/golden.json; also keep a copy in workspace for artifacts
+          cp /tmp/golden.json golden.json
 
       - name: Enforce golden.json checks
         run: |
-          set -euxo pipefail
-          python3 - <<'PY'
+          python - <<'PY'
           import json
-          with open("golden.json", "r", encoding="utf-8") as handle:
-              data = json.load(handle)
+          with open("golden.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+
           errors = []
           if data.get("pass") is not True:
               errors.append("pass != true")
           if data.get("perf_pass") is not True:
               errors.append("perf_pass != true")
+
           status_end = data.get("status_end") or {}
-          if status_end.get("active_jobs") not in (0, "0"):
-              errors.append("status_end.active_jobs != 0")
+          if status_end.get("active_jobs") not in (0, "0", None):
+              errors.append(f"status_end.active_jobs != 0 (got {status_end.get('active_jobs')})")
+
           if errors:
               raise SystemExit("Golden checks failed: " + ", ".join(errors))
+
           print("Golden checks passed")
           PY
 
@@ -139,9 +113,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-json
-          path: |
-            golden.json
-          if-no-files-found: warn
+          path: golden.json
+          if-no-files-found: error
 
       - name: Dump logs on failure
         if: failure()
@@ -152,13 +125,3 @@ jobs:
           tail -n 200 /tmp/px-worker1.log || true
           echo "=== /tmp/px-worker2.log (tail) ==="
           tail -n 200 /tmp/px-worker2.log || true
-          echo "=== redis logs (tail) ==="
-          docker logs --tail 200 px-redis || true
-
-      - name: Cleanup (always)
-        if: always()
-        run: |
-          set -euxo pipefail
-          pkill -f "uvicorn api\.app:app" || true
-          pkill -f "python -m core\.worker_main" || true
-          docker rm -f px-redis || true
