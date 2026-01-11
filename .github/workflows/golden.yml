@@ -7,6 +7,7 @@ on:
 jobs:
   golden:
     runs-on: ubuntu-latest
+
     services:
       redis:
         image: redis:7
@@ -16,7 +17,7 @@ jobs:
           --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 3s
-          --health-retries 20
+          --health-retries 30
 
     env:
       PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
@@ -40,15 +41,55 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run golden
+      - name: Start API + workers
         run: |
-          bash scripts/local_scale.sh
-          make golden
+          set -euxo pipefail
 
-      - name: Upload golden artifact
+          # Start API (2 uvicorn workers)
+          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+
+          # Start 2 job workers (scale by running more processes)
+          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+
+          # Wait for health
+          python - <<'PY'
+          import time, urllib.request
+          url = "http://127.0.0.1:8000/health"
+          last = None
+          for _ in range(60):
+            try:
+              with urllib.request.urlopen(url, timeout=2) as r:
+                if r.status == 200:
+                  print("API healthy")
+                  raise SystemExit(0)
+            except Exception as e:
+              last = e
+              time.sleep(1)
+          raise RuntimeError(f"API not healthy: {last}")
+          PY
+
+      - name: Run golden regression
+        run: |
+          set -euxo pipefail
+          # Prefer the script directly (less Makefile assumptions in CI)
+          python scripts/golden_regression.py --api-base http://127.0.0.1:8000 --min-workers 2 --status-delay 1
+
+      - name: Upload golden.json
         uses: actions/upload-artifact@v4
         with:
           name: golden-json
           path: |
+            golden.json
             **/golden.json
-            **/artifacts/golden.json
+          if-no-files-found: warn
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          echo "=== /tmp/px-api.log (tail) ==="
+          tail -n 200 /tmp/px-api.log || true
+          echo "=== /tmp/px-worker1.log (tail) ==="
+          tail -n 200 /tmp/px-worker1.log || true
+          echo "=== /tmp/px-worker2.log (tail) ==="
+          tail -n 200 /tmp/px-worker2.log || true
