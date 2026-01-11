@@ -1,0 +1,54 @@
+name: golden
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  golden:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install backend deps
+        working-directory: pronouncex-tts
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run golden
+        run: |
+          bash scripts/local_scale.sh
+          make golden
+
+      - name: Upload golden artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-json
+          path: |
+            **/golden.json
+            **/artifacts/golden.json
