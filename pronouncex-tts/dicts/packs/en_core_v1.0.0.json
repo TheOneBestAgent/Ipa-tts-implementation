@@ -1,0 +1,12 @@
+{
+  "name": "en_core",
+  "version": "1.0.0",
+  "description": "Core English IPA entries",
+  "entries": {
+    "read": "ɹiːd",
+    "lead": "liːd",
+    "data": "ˈdeɪtə",
+    "analysis": "əˈnæləsɪs",
+    "queue": "kjuː"
+  }
+}

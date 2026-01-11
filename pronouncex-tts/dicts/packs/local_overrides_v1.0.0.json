@@ -1,0 +1,10 @@
+{
+  "name": "local_overrides",
+  "version": "1.0.0",
+  "description": "User-provided IPA overrides",
+  "entries": {
+    "Gojo Satoru": "ɡˈoʊdʒoʊ sˈɑːtɔɹu",
+    "tch": "tʃ",
+    "gojo": "ɡˈoʊdʒoʊ"
+  }
+}

@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  api:
+    build:
+      context: .
+      dockerfile: pronouncex-tts/docker/Dockerfile
+    command: uvicorn api.app:app --host 0.0.0.0 --port 8000 --workers 4
+    ports:
+      - "8000:8000"
+    environment:
+      PRONOUNCEX_TTS_PUBLIC_SEGMENT_BASE_URL: /api/tts
+      PRONOUNCEX_TTS_ROLE: api
+      PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
+      PRONOUNCEX_TTS_CACHE_DIR: /cache
+      PRONOUNCEX_TTS_JOBS_DIR: /cache/jobs
+      PRONOUNCEX_TTS_SEGMENTS_DIR: /cache/segments
+      PRONOUNCEX_TTS_TMP_DIR: /cache/tmp
+    volumes:
+      - px_cache:/cache
+      - ./pronouncex-tts/dicts:/app/dicts:ro
+    depends_on:
+      - redis
+  worker:
+    build:
+      context: .
+      dockerfile: pronouncex-tts/docker/Dockerfile
+    command: python -m core.worker_main
+    environment:
+      PRONOUNCEX_TTS_ROLE: worker
+      PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
+      PRONOUNCEX_TTS_CACHE_DIR: /cache
+      PRONOUNCEX_TTS_JOBS_DIR: /cache/jobs
+      PRONOUNCEX_TTS_SEGMENTS_DIR: /cache/segments
+      PRONOUNCEX_TTS_TMP_DIR: /cache/tmp
+    volumes:
+      - px_cache:/cache
+      - ./pronouncex-tts/dicts:/app/dicts:ro
+    depends_on:
+      - redis
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      TTS_BACKEND_URL: http://api:8000
+    depends_on:
+      - api
+
+volumes:
+  px_cache:

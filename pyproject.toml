@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pronouncex"
+version = "0.1.0"
+description = "Pronunciation-first English TTS pipeline with IPA dictionaries and Coqui VITS backend."
+authors = [{name = "PronounceX", email = "team@example.com"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.23",
+  "pydantic>=2.5",
+  "python-dotenv>=1.0",
+  "numpy>=1.26",
+  "TTS>=0.22",
+  "pronouncing>=0.2.0",
+  "orjson>=3.9",
+  "pyyaml>=6.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "httpx>=0.25"
+]
+
+[tool.setuptools]
+package-dir = {"" = "."}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["pronouncex"]
+
+[tool.uvicorn]
+factory = true
+app = "tts_service:create_app"

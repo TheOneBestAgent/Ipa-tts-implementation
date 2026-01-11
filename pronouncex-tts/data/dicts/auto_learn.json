@@ -1,0 +1,840 @@
+{
+  "name": "auto_learn",
+  "version": "20260109-194959",
+  "format": "espeak",
+  "entries": {
+    "gojo satoru": {
+      "phonemes": "ɡˈoʊdʒoʊ sˈæɾɔːɹˌuː",
+      "count": 1
+    },
+    "arrives": {
+      "phonemes": "ɚɹˈaɪvz",
+      "count": 1
+    },
+    "tch": {
+      "phonemes": "tˌiːsˌiːˈeɪtʃ",
+      "count": 1
+    },
+    "the": {
+      "phonemes": "ðə",
+      "count": 1
+    },
+    "station": {
+      "phonemes": "stˈeɪʃən",
+      "count": 1
+    },
+    "this": {
+      "phonemes": "ðˈɪs",
+      "count": 1
+    },
+    "paragraph": {
+      "phonemes": "pˈæɹəɡɹˌæf",
+      "count": 1
+    },
+    "should": {
+      "phonemes": "ʃˈʊd",
+      "count": 1
+    },
+    "produce": {
+      "phonemes": "pɹədˈuːs",
+      "count": 1
+    },
+    "multiple": {
+      "phonemes": "mˌʌltɪpəl",
+      "count": 1
+    },
+    "segments": {
+      "phonemes": "sˈɛɡmənts",
+      "count": 1
+    },
+    "for": {
+      "phonemes": "fɔːɹ",
+      "count": 1
+    },
+    "benchmarking": {
+      "phonemes": "bˈɛntʃmɑːɹkɪŋ",
+      "count": 1
+    },
+    "quick": {
+      "phonemes": "kwˈɪk",
+      "count": 1
+    },
+    "brown": {
+      "phonemes": "bɹˈaʊn",
+      "count": 1
+    },
+    "fox": {
+      "phonemes": "fˈɑːks",
+      "count": 1
+    },
+    "jumps": {
+      "phonemes": "dʒˈʌmps",
+      "count": 1
+    },
+    "over": {
+      "phonemes": "ˈoʊvɚ",
+      "count": 1
+    },
+    "lazy": {
+      "phonemes": "lˈeɪzi",
+      "count": 1
+    },
+    "dog": {
+      "phonemes": "dˈɑːɡ",
+      "count": 1
+    },
+    "pronouncex": {
+      "phonemes": "pɹənˈaʊns ˈɛks",
+      "count": 1
+    },
+    "keep": {
+      "phonemes": "kˈiːp",
+      "count": 1
+    },
+    "sentence": {
+      "phonemes": "sˈɛntəns",
+      "count": 1
+    },
+    "boundaries": {
+      "phonemes": "bˈaʊndɚɹiz",
+      "count": 1
+    },
+    "while": {
+      "phonemes": "wˈaɪl",
+      "count": 1
+    },
+    "chunking": {
+      "phonemes": "tʃˈʌŋkɪŋ",
+      "count": 1
+    },
+    "longer": {
+      "phonemes": "lˈɔŋɡɚ",
+      "count": 1
+    },
+    "line": {
+      "phonemes": "lˈaɪn",
+      "count": 1
+    },
+    "push": {
+      "phonemes": "pˈʊʃ",
+      "count": 1
+    },
+    "chunk": {
+      "phonemes": "tʃˈʌŋk",
+      "count": 1
+    },
+    "splitting": {
+      "phonemes": "splˈɪɾɪŋ",
+      "count": 1
+    },
+    "and": {
+      "phonemes": "ænd",
+      "count": 1
+    },
+    "measure": {
+      "phonemes": "mˈɛʒɚ",
+      "count": 1
+    },
+    "throughput": {
+      "phonemes": "θɹˈuːpʊt",
+      "count": 1
+    },
+    "short": {
+      "phonemes": "ʃˈɔːɹt",
+      "count": 1
+    },
+    "meanwhile": {
+      "phonemes": "mˈiːnwaɪl",
+      "count": 1
+    },
+    "greets": {
+      "phonemes": "ɡɹˈiːts",
+      "count": 1
+    },
+    "second": {
+      "phonemes": "sˈɛkənd",
+      "count": 1
+    },
+    "his": {
+      "phonemes": "hˈɪz",
+      "count": 1
+    },
+    "introduces": {
+      "phonemes": "ˌɪntɹədˈuːsᵻz",
+      "count": 1
+    },
+    "classmates": {
+      "phonemes": "klˈæsmeɪts",
+      "count": 1
+    },
+    "city": {
+      "phonemes": "sˈɪɾi",
+      "count": 1
+    },
+    "sequence": {
+      "phonemes": "sˈiːkwəns",
+      "count": 1
+    },
+    "hums": {
+      "phonemes": "hˈʌmz",
+      "count": 1
+    },
+    "with": {
+      "phonemes": "wɪð",
+      "count": 1
+    },
+    "words": {
+      "phonemes": "wˈɜːdz",
+      "count": 1
+    },
+    "late": {
+      "phonemes": "lˈeɪt",
+      "count": 1
+    },
+    "afternoon": {
+      "phonemes": "ˌæftɚnˈuːn",
+      "count": 1
+    },
+    "stretch": {
+      "phonemes": "stɹˈɛtʃ",
+      "count": 1
+    },
+    "traffic": {
+      "phonemes": "tɹˈæfɪk",
+      "count": 1
+    },
+    "chunker": {
+      "phonemes": "tʃˈʌŋkɚ",
+      "count": 1
+    },
+    "crowd": {
+      "phonemes": "kɹˈaʊd",
+      "count": 1
+    },
+    "moves": {
+      "phonemes": "mˈuːvz",
+      "count": 1
+    },
+    "intentionally": {
+      "phonemes": "ɪntˈɛnʃənəli",
+      "count": 1
+    },
+    "slow": {
+      "phonemes": "slˈoʊ",
+      "count": 1
+    },
+    "verbose": {
+      "phonemes": "vɜːbˈoʊs",
+      "count": 1
+    },
+    "waves": {
+      "phonemes": "wˈeɪvz",
+      "count": 1
+    },
+    "describing": {
+      "phonemes": "dᵻskɹˈaɪbɪŋ",
+      "count": 1
+    },
+    "respect": {
+      "phonemes": "ɹᵻspˈɛkt",
+      "count": 1
+    },
+    "scene": {
+      "phonemes": "sˈiːn",
+      "count": 1
+    },
+    "but": {
+      "phonemes": "bˌʌt",
+      "count": 1
+    },
+    "pacing": {
+      "phonemes": "pˈeɪsɪŋ",
+      "count": 1
+    },
+    "also": {
+      "phonemes": "ˈɔːlsoʊ",
+      "count": 1
+    },
+    "cadence": {
+      "phonemes": "kˈeɪdəns",
+      "count": 1
+    },
+    "split": {
+      "phonemes": "splˈɪt",
+      "count": 1
+    },
+    "when": {
+      "phonemes": "wˌɛn",
+      "count": 1
+    },
+    "narration": {
+      "phonemes": "nɚɹˈeɪʃən",
+      "count": 1
+    },
+    "lines": {
+      "phonemes": "lˈaɪnz",
+      "count": 1
+    },
+    "grow": {
+      "phonemes": "ɡɹˈoʊ",
+      "count": 1
+    },
+    "too": {
+      "phonemes": "tˈuː",
+      "count": 1
+    },
+    "flows": {
+      "phonemes": "flˈoʊz",
+      "count": 1
+    },
+    "long": {
+      "phonemes": "lˈɔŋ",
+      "count": 1
+    },
+    "through": {
+      "phonemes": "θɹˈuː",
+      "count": 1
+    },
+    "text": {
+      "phonemes": "tˈɛkst",
+      "count": 1
+    },
+    "each": {
+      "phonemes": "ˈiːtʃ",
+      "count": 1
+    },
+    "want": {
+      "phonemes": "wˈɔnt",
+      "count": 1
+    },
+    "help": {
+      "phonemes": "hˈɛlp",
+      "count": 1
+    },
+    "evaluate": {
+      "phonemes": "ɪvˈæljuːˌeɪt",
+      "count": 1
+    },
+    "test": {
+      "phonemes": "tˈɛst",
+      "count": 1
+    },
+    "whether": {
+      "phonemes": "wˈɛðɚ",
+      "count": 1
+    },
+    "concurrency": {
+      "phonemes": "kəŋkˈɜːɹənsi",
+      "count": 1
+    },
+    "targets": {
+      "phonemes": "tˈɑːɹɡɪts",
+      "count": 1
+    },
+    "caching": {
+      "phonemes": "kˈæʃɪŋ",
+      "count": 1
+    },
+    "are": {
+      "phonemes": "ɑːɹ",
+      "count": 1
+    },
+    "behavior": {
+      "phonemes": "bᵻhˈeɪvjɚ",
+      "count": 1
+    },
+    "working": {
+      "phonemes": "wˈɜːkɪŋ",
+      "count": 1
+    },
+    "expected": {
+      "phonemes": "ɛkspˈɛktᵻd",
+      "count": 1
+    },
+    "finally": {
+      "phonemes": "fˈaɪnəli",
+      "count": 1
+    },
+    "swells": {
+      "phonemes": "swˈɛlz",
+      "count": 1
+    },
+    "without": {
+      "phonemes": "wɪðˈaʊt",
+      "count": 1
+    },
+    "around": {
+      "phonemes": "ɚɹˈaʊnd",
+      "count": 1
+    },
+    "changing": {
+      "phonemes": "tʃˈeɪndʒɪŋ",
+      "count": 1
+    },
+    "plaza": {
+      "phonemes": "plˈɑːzə",
+      "count": 1
+    },
+    "pronunciation": {
+      "phonemes": "pɹənˌʌnsɪˈeɪʃən",
+      "count": 1
+    },
+    "rules": {
+      "phonemes": "ɹˈuːlz",
+      "count": 1
+    },
+    "toward": {
+      "phonemes": "təwˈɔːɹd",
+      "count": 1
+    },
+    "first": {
+      "phonemes": "fˈɜːst",
+      "count": 1
+    },
+    "exits": {
+      "phonemes": "ˈɛɡzɪts",
+      "count": 1
+    },
+    "continues": {
+      "phonemes": "kəntˈɪnjuːz",
+      "count": 1
+    },
+    "still": {
+      "phonemes": "stˈɪl",
+      "count": 1
+    },
+    "extra": {
+      "phonemes": "ˈɛkstɹə",
+      "count": 1
+    },
+    "spans": {
+      "phonemes": "spˈænz",
+      "count": 1
+    },
+    "sentences": {
+      "phonemes": "sˈɛntənsᵻz",
+      "count": 1
+    },
+    "into": {
+      "phonemes": "ˌɪntʊ",
+      "count": 1
+    },
+    "manageable": {
+      "phonemes": "mˈænɪdʒəbəl",
+      "count": 1
+    },
+    "its": {
+      "phonemes": "ɪts",
+      "count": 1
+    },
+    "playback": {
+      "phonemes": "plˈeɪbæk",
+      "count": 1
+    },
+    "target": {
+      "phonemes": "tˈɑːɹɡɪt",
+      "count": 1
+    },
+    "size": {
+      "phonemes": "sˈaɪz",
+      "count": 1
+    },
+    "mode": {
+      "phonemes": "mˈoʊd",
+      "count": 1
+    },
+    "another": {
+      "phonemes": "ɐnˈʌðɚ",
+      "count": 1
+    },
+    "adds": {
+      "phonemes": "ˈædz",
+      "count": 1
+    },
+    "more": {
+      "phonemes": "mˈɔːɹ",
+      "count": 1
+    },
+    "ensure": {
+      "phonemes": "ɛnʃˈʊɹ",
+      "count": 1
+    },
+    "exceeded": {
+      "phonemes": "ɛksˈiːdᵻd",
+      "count": 1
+    },
+    "created": {
+      "phonemes": "kɹiːˈeɪɾᵻd",
+      "count": 1
+    },
+    "stretches": {
+      "phonemes": "stɹˈɛtʃᵻz",
+      "count": 1
+    },
+    "out": {
+      "phonemes": "ˈaʊt",
+      "count": 1
+    },
+    "details": {
+      "phonemes": "diːtˈeɪlz",
+      "count": 1
+    },
+    "about": {
+      "phonemes": "ɐbˈaʊt",
+      "count": 1
+    },
+    "balance": {
+      "phonemes": "bˈæləns",
+      "count": 1
+    },
+    "between": {
+      "phonemes": "bᵻtwˈiːn",
+      "count": 1
+    },
+    "clarity": {
+      "phonemes": "klˈæɹᵻɾi",
+      "count": 1
+    },
+    "speed": {
+      "phonemes": "spˈiːd",
+      "count": 1
+    },
+    "here": {
+      "phonemes": "hˈɪɹ",
+      "count": 1
+    },
+    "slightly": {
+      "phonemes": "slˈaɪtli",
+      "count": 1
+    },
+    "designed": {
+      "phonemes": "dɪzˈaɪnd",
+      "count": 1
+    },
+    "character": {
+      "phonemes": "kˈæɹɪktɚ",
+      "count": 1
+    },
+    "count": {
+      "phonemes": "kˈaʊnt",
+      "count": 1
+    },
+    "maintaining": {
+      "phonemes": "meɪntˈeɪnɪŋ",
+      "count": 1
+    },
+    "readable": {
+      "phonemes": "ɹˈiːdəbəl",
+      "count": 1
+    },
+    "structure": {
+      "phonemes": "stɹˈʌktʃɚ",
+      "count": 1
+    },
+    "simple": {
+      "phonemes": "sˈɪmpəl",
+      "count": 1
+    },
+    "add": {
+      "phonemes": "ˈæd",
+      "count": 1
+    },
+    "combined": {
+      "phonemes": "kəmbˈaɪnd",
+      "count": 1
+    },
+    "length": {
+      "phonemes": "lˈɛŋθ",
+      "count": 1
+    },
+    "increase": {
+      "phonemes": "ˈɪŋkɹiːs",
+      "count": 1
+    },
+    "force": {
+      "phonemes": "fˈɔːɹs",
+      "count": 1
+    },
+    "total": {
+      "phonemes": "tˈoʊɾəl",
+      "count": 1
+    },
+    "several": {
+      "phonemes": "sˈɛvɹəl",
+      "count": 1
+    },
+    "guarantee": {
+      "phonemes": "ɡˌæɹəntˈiː",
+      "count": 1
+    },
+    "across": {
+      "phonemes": "əkɹˈɑːs",
+      "count": 1
+    },
+    "cut": {
+      "phonemes": "kˈʌt",
+      "count": 1
+    },
+    "alone": {
+      "phonemes": "ɐlˈoʊn",
+      "count": 1
+    },
+    "only": {
+      "phonemes": "ˈoʊnli",
+      "count": 1
+    },
+    "must": {
+      "phonemes": "mˈʌst",
+      "count": 1
+    },
+    "keeping": {
+      "phonemes": "kˈiːpɪŋ",
+      "count": 1
+    },
+    "where": {
+      "phonemes": "wˈɛɹ",
+      "count": 1
+    },
+    "possible": {
+      "phonemes": "pˈɑːsᵻbəl",
+      "count": 1
+    },
+    "third": {
+      "phonemes": "θˈɜːd",
+      "count": 1
+    },
+    "wraps": {
+      "phonemes": "ɹˈæps",
+      "count": 1
+    },
+    "few": {
+      "phonemes": "fjˈuː",
+      "count": 1
+    },
+    "enough": {
+      "phonemes": "ɪnˈʌf",
+      "count": 1
+    },
+    "least": {
+      "phonemes": "lˈiːst",
+      "count": 1
+    },
+    "two": {
+      "phonemes": "tˈuː",
+      "count": 1
+    },
+    "chunks": {
+      "phonemes": "tʃˈʌŋks",
+      "count": 1
+    },
+    "earlier": {
+      "phonemes": "ˈɜːlɪɚ",
+      "count": 1
+    },
+    "paragraphs": {
+      "phonemes": "pˈæɹəɡɹˌæfz",
+      "count": 1
+    },
+    "did": {
+      "phonemes": "dˈɪd",
+      "count": 1
+    },
+    "not": {
+      "phonemes": "nˈɑːt",
+      "count": 1
+    },
+    "already": {
+      "phonemes": "ɔːlɹˈɛdi",
+      "count": 1
+    },
+    "final": {
+      "phonemes": "fˈaɪnəl",
+      "count": 1
+    },
+    "bit": {
+      "phonemes": "bˈɪt",
+      "count": 1
+    },
+    "makes": {
+      "phonemes": "mˈeɪks",
+      "count": 1
+    },
+    "sure": {
+      "phonemes": "ʃˈʊɹ",
+      "count": 1
+    },
+    "covers": {
+      "phonemes": "kˈʌvɚz",
+      "count": 1
+    },
+    "content": {
+      "phonemes": "kˈɑːntɛnt",
+      "count": 1
+    },
+    "concurrent": {
+      "phonemes": "kəŋkˈɜːɹənt",
+      "count": 1
+    },
+    "synthesis": {
+      "phonemes": "sˈɪnθəsˌɪs",
+      "count": 1
+    },
+    "end": {
+      "phonemes": "ˈɛnd",
+      "count": 1
+    },
+    "sample": {
+      "phonemes": "sˈæmpəl",
+      "count": 1
+    },
+    "keeps": {
+      "phonemes": "kˈiːps",
+      "count": 1
+    },
+    "going": {
+      "phonemes": "ɡˈoʊɪŋ",
+      "count": 1
+    },
+    "one": {
+      "phonemes": "wˌʌn",
+      "count": 1
+    },
+    "joins": {
+      "phonemes": "dʒˈɔɪnz",
+      "count": 1
+    },
+    "climbing": {
+      "phonemes": "klˈaɪmɪŋ",
+      "count": 1
+    },
+    "discussion": {
+      "phonemes": "dɪskˈʌʃən",
+      "count": 1
+    },
+    "extends": {
+      "phonemes": "ɛkstˈɛndz",
+      "count": 1
+    },
+    "characters": {
+      "phonemes": "kˈæɹɪktɚz",
+      "count": 1
+    },
+    "eight": {
+      "phonemes": "ˈeɪt",
+      "count": 1
+    },
+    "yet": {
+      "phonemes": "jˈɛt",
+      "count": 1
+    },
+    "full": {
+      "phonemes": "fˈʊl",
+      "count": 1
+    },
+    "ensures": {
+      "phonemes": "ɛnʃˈʊɹz",
+      "count": 1
+    },
+    "job": {
+      "phonemes": "dʒˈɑːb",
+      "count": 1
+    },
+    "descriptive": {
+      "phonemes": "dᵻskɹˈɪptɪv",
+      "count": 1
+    },
+    "cross": {
+      "phonemes": "kɹˈɔs",
+      "count": 1
+    },
+    "repeats": {
+      "phonemes": "ɹᵻpˈiːts",
+      "count": 1
+    },
+    "threshold": {
+      "phonemes": "θɹˈɛʃoʊld",
+      "count": 1
+    },
+    "pattern": {
+      "phonemes": "pˈætɚn",
+      "count": 1
+    },
+    "high": {
+      "phonemes": "hˈaɪ",
+      "count": 1
+    },
+    "mentions": {
+      "phonemes": "mˈɛnʃənz",
+      "count": 1
+    },
+    "importance": {
+      "phonemes": "ɪmpˈɔːɹtəns",
+      "count": 1
+    },
+    "stable": {
+      "phonemes": "stˈeɪbəl",
+      "count": 1
+    },
+    "manifest": {
+      "phonemes": "mˈænɪfˌɛst",
+      "count": 1
+    },
+    "ordering": {
+      "phonemes": "ˈɔːɹdɚɹɪŋ",
+      "count": 1
+    },
+    "fourth": {
+      "phonemes": "fˈɔːɹθ",
+      "count": 1
+    },
+    "hello": {
+      "phonemes": "həlˈoʊ",
+      "count": 1
+    },
+    "world": {
+      "phonemes": "wˈɜːld",
+      "count": 1
+    },
+    "asahi": {
+      "phonemes": "ɐsˈɑːhi",
+      "count": 1
+    },
+    "stared": {
+      "phonemes": "stˈɛɹd",
+      "count": 1
+    },
+    "alise": {
+      "phonemes": "ɐlˈiːs",
+      "count": 1
+    },
+    "annoyed": {
+      "phonemes": "ɐnˈɔɪd",
+      "count": 1
+    },
+    "her": {
+      "phonemes": "hɜː",
+      "count": 1
+    },
+    "responses": {
+      "phonemes": "ɹᵻspˈɑːnsᵻz",
+      "count": 1
+    },
+    "she": {
+      "phonemes": "ʃiː",
+      "count": 1
+    },
+    "told": {
+      "phonemes": "tˈoʊld",
+      "count": 1
+    },
+    "gojo": {
+      "phonemes": "ɡˈoʊdʒoʊ",
+      "count": 3,
+      "updated_at": "2026-01-09T19:49:59.954818+00:00"
+    },
+    "senpai": {
+      "phonemes": "sˈɛnpaɪ",
+      "count": 1
+    }
+  }
+}

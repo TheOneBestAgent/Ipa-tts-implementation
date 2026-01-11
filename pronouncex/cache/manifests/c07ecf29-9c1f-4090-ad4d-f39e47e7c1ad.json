@@ -1,0 +1,21 @@
+{
+  "job_id": "c07ecf29-9c1f-4090-ad4d-f39e47e7c1ad",
+  "status": "completed",
+  "segments": [
+    {
+      "segment_id": "2eadcf9a-c50d-4923-8a3f-e939408fc671",
+      "text": "[[PHONEMES:ˈ G OW JH OW|Gojo]] meets [[PHONEMES:S UW ˈ K UW N AH|Sukuna]] in the city square.",
+      "cache_key": "91745a9d3467c11c5e1b54bf6d9fddc596167081288103bba759e54aac33032f",
+      "status": "completed",
+      "error": null
+    }
+  ],
+  "model_id": "tts_models/en/ljspeech/vits",
+  "voice_id": null,
+  "dict_versions": [
+    "anime_en_ipa:1767398852",
+    "en_custom_ipa:1767398856",
+    "overrides_local:1767398859"
+  ],
+  "error": null
+}

@@ -1,0 +1,38 @@
+{
+  "SQL": {
+    "ipa": "ˈsiː.kwəl",
+    "phonemes": "ˈ S IY K W AH L",
+    "source": "tech",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "GIF": {
+    "ipa": "dʒɪf",
+    "phonemes": "JH IH F",
+    "source": "common",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "router": {
+    "ipa": "ˈruː.tər",
+    "phonemes": "ˈ R UW T AH R",
+    "source": "networking",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "cache": {
+    "ipa": "kæʃ",
+    "phonemes": "K AE SH",
+    "source": "tech",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "AI": {
+    "ipa": "ˌeɪˈaɪ",
+    "phonemes": "ˌ EY ˈ AY",
+    "source": "acronym",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "GPU": {
+    "ipa": "ˌdʒiː.piːˈjuː",
+    "phonemes": "ˌ JH IY P IY ˈ Y UW",
+    "source": "acronym",
+    "model": "tts_models/en/ljspeech/vits"
+  }
+}

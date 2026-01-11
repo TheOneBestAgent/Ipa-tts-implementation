@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  pronouncex-tts:
+    build:
+      context: .
+      dockerfile: pronouncex-tts/docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./pronouncex-tts/dicts:/app/dicts
+      - ./pronouncex-tts/data:/app/data

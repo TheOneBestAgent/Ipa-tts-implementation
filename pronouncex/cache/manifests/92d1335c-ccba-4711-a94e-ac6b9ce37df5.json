@@ -1,0 +1,21 @@
+{
+  "job_id": "92d1335c-ccba-4711-a94e-ac6b9ce37df5",
+  "status": "failed",
+  "segments": [
+    {
+      "segment_id": "1578a35c-5e92-40a8-9fe6-58e51bcf2d7f",
+      "text": "[[PHONEMES:ˈ G OW JH OW|Gojo]] meets [[PHONEMES:S UW ˈ K UW N AH|Sukuna]] in the city square.",
+      "cache_key": "91745a9d3467c11c5e1b54bf6d9fddc596167081288103bba759e54aac33032f",
+      "status": "failed",
+      "error": " [!] No espeak backend found. Install espeak-ng or espeak to your system."
+    }
+  ],
+  "model_id": "tts_models/en/ljspeech/vits",
+  "voice_id": null,
+  "dict_versions": [
+    "anime_en_ipa:1767398852",
+    "en_custom_ipa:1767398856",
+    "overrides_local:1767398859"
+  ],
+  "error": " [!] No espeak backend found. Install espeak-ng or espeak to your system."
+}

@@ -1,0 +1,14 @@
+{
+  "DARPA": {
+    "ipa": "ˈdɑːr.pə",
+    "phonemes": "ˈ D AA R P AH",
+    "source": "local",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Gojo": {
+    "ipa": "ˈɡoʊ.dʒoʊ",
+    "phonemes": "ˈ G OW JH OW",
+    "source": "local override",
+    "model": "tts_models/en/ljspeech/vits"
+  }
+}

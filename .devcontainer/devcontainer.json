@@ -1,0 +1,28 @@
+{
+  "name": "PronounceX TTS",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "workspaceFolder": "/workspaces/Ipa-tts-implementation/pronouncex-tts",
+  "containerEnv": {
+    "PRONOUNCEX_TTS_MODEL_ALLOWLIST": "tts_models/en/ljspeech/vits"
+  },
+  "forwardPorts": [8000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "github.copilot-chat",
+        "kilocode.kilo-code",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode-remote.remote-containers",
+        "openai.chatgpt"
+      ]
+    }
+  },
+  "postCreateCommand": "pip install -U pip && pip install -r requirements.txt && npm install -g @fission-ai/openspec@latest @kilocode/cli @openai/codex"
+}

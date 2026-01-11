@@ -1,0 +1,12 @@
+{
+  "name": "anime_en",
+  "version": "1.0.0",
+  "description": "Anime and Japanese-in-English terms (IPA)",
+  "entries": {
+    "gojo": "ˈɡoʊdʒoʊ",
+    "senpai": "ˈsɛnpaɪ",
+    "sukuna": "suːˈkuːnə",
+    "itadori": "ˈiːtɑːdɔːri",
+    "shibuya": "ʃɪˈbuːjə"
+  }
+}

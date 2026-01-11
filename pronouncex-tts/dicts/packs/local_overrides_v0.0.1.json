@@ -1,0 +1,6 @@
+{
+  "name": "local_overrides",
+  "version": "0.0.1",
+  "description": "User-provided IPA overrides",
+  "entries": {}
+}

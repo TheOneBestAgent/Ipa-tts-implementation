@@ -1,0 +1,44 @@
+{
+  "Gojo": {
+    "ipa": "ˈɡoʊ.dʒoʊ",
+    "phonemes": "ˈ G OW JH OW",
+    "source": "jjk",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Sukuna": {
+    "ipa": "suːˈkuː.na",
+    "phonemes": "S UW ˈ K UW N AH",
+    "source": "jjk",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Senpai": {
+    "ipa": "ˈsɛn.paɪ",
+    "phonemes": "ˈ S EH N P AY",
+    "source": "anime",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Shonen": {
+    "ipa": "ˈʃoʊ.nɛn",
+    "phonemes": "ˈ SH OW N EH N",
+    "source": "anime",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Mangaka": {
+    "ipa": "mɑːŋˈɡɑː.kə",
+    "phonemes": "M AA NG ˈ G AA K AH",
+    "source": "anime",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Yor": {
+    "ipa": "jɔːr",
+    "phonemes": "Y AO R",
+    "source": "spyxfamily",
+    "model": "tts_models/en/ljspeech/vits"
+  },
+  "Anya": {
+    "ipa": "ˈɑː.njə",
+    "phonemes": "ˈ AA N Y AH",
+    "source": "spyxfamily",
+    "model": "tts_models/en/ljspeech/vits"
+  }
+}
