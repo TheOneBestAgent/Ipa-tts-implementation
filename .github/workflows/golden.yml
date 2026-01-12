@@ -82,31 +82,21 @@ jobs:
                 echo "=== /tmp/px-worker2.log (tail) ==="
                 tail -n 200 /tmp/px-worker2.log || true
               }
-              trap "log_fail" ERR
+              trap "rc=\$?; if [[ \$rc -ne 0 ]]; then log_fail; fi" EXIT
 
-              (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+              pushd pronouncex-tts >/dev/null
+              nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &
               api_pid=$!
-              (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+              nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &
               worker1_pid=$!
-              (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+              nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &
               worker2_pid=$!
+              popd >/dev/null
 
               sleep 2
-              if ! kill -0 "$api_pid"; then
-                echo "uvicorn exited early"
-                log_fail
-                exit 1
-              fi
-              if ! kill -0 "$worker1_pid"; then
-                echo "worker1 exited early"
-                log_fail
-                exit 1
-              fi
-              if ! kill -0 "$worker2_pid"; then
-                echo "worker2 exited early"
-                log_fail
-                exit 1
-              fi
+              kill -0 "$api_pid" || { echo "uvicorn exited early"; exit 1; }
+              kill -0 "$worker1_pid" || { echo "worker1 exited early"; exit 1; }
+              kill -0 "$worker2_pid" || { echo "worker2 exited early"; exit 1; }
 
               python -c "code = \"\"\"import time\nimport urllib.request\n\nurl = \\\"http://127.0.0.1:8000/health\\\"\nlast = None\nfor _ in range(180):\n    try:\n        with urllib.request.urlopen(url, timeout=2) as r:\n            if r.status == 200:\n                print(\\\"API healthy\\\")\n                raise SystemExit(0)\n    except Exception as e:\n        last = e\n        time.sleep(1)\nraise RuntimeError(f\\\"API not healthy: {last}\\\")\n\"\"\"; exec(code)"
 
