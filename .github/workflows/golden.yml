@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sanity: tools present
+      - name: "Sanity: tools present"
         run: |
           set -eux
           command -v python3
