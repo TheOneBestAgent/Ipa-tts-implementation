@@ -180,6 +180,25 @@ Benchmark a model:
 python3 scripts/benchmark_models.py --text /path/to/text.txt --models tts_models/en/ljspeech/vits
 ```
 
+## Golden regression + baseline
+
+The golden suite writes JSON results and compares timings against a committed baseline.
+
+Run the suite locally:
+
+```bash
+make golden
+```
+
+Refresh the baseline (after a known-good run):
+
+```bash
+mkdir -p artifacts
+cp /tmp/golden.json artifacts/golden_baseline.json
+```
+
+Commit `artifacts/golden_baseline.json` so perf checks stay deterministic.
+
 Troubleshooting:
 
 - Too many workers can slow down CPU-only runs due to contention; lower `PRONOUNCEX_TTS_WORKERS` or `PRONOUNCEX_TTS_JOB_WORKERS`.
