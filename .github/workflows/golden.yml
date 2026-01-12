@@ -4,50 +4,74 @@ on:
   push:
   pull_request:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
-    env:
-      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: "Sanity: tools present"
+      - name: Sanity: tools present
         run: |
           set -eux
           command -v python3
           python3 --version
-          command -v redis-server
-          command -v redis-cli
-          command -v ffmpeg
+          command -v docker
+          docker version
+          docker ps
 
-      - name: Ensure redis running (host)
+      - name: Start redis (docker, isolated)
         run: |
           set -eux
-          if ss -ltnp | grep -q ':6379'; then
-            echo "Redis already listening on 6379"
-          else
-            redis-server --daemonize yes
-          fi
-          redis-cli ping
+
+          # Cleanup any previous redis container from prior runs
+          docker rm -f px-redis >/dev/null 2>&1 || true
+
+          # Use a non-default host port to avoid collisions with any local redis you might already run
+          REDIS_PORT=6380
+
+          docker run -d --name px-redis \
+            -p ${REDIS_PORT}:6379 \
+            --health-cmd "redis-cli ping" \
+            --health-interval 2s \
+            --health-timeout 2s \
+            --health-retries 30 \
+            redis:7
+
+          # Wait until healthy
+          for i in {1..60}; do
+            status="$(docker inspect -f '{{.State.Health.Status}}' px-redis 2>/dev/null || true)"
+            if [[ "$status" == "healthy" ]]; then
+              echo "Redis healthy"
+              break
+            fi
+            sleep 1
+          done
+
+          test "$(docker inspect -f '{{.State.Health.Status}}' px-redis)" = "healthy"
+
+          echo "REDIS_URL=redis://127.0.0.1:${REDIS_PORT}/0" >> $GITHUB_ENV
 
       - name: Create venv + install deps
         run: |
           set -eux
           python3 -m venv .venv
           . .venv/bin/activate
+
+          # Ensure pip exists on this machine's Python
+          python -m ensurepip --upgrade || true
           python -m pip install --upgrade pip setuptools wheel
 
           cd pronouncex-tts
           pip install -r requirements.txt
 
       - name: Start API + workers
+        env:
+          PRONOUNCEX_TTS_REDIS_URL: ${{ env.REDIS_URL }}
         run: |
           set -eux
           . .venv/bin/activate
@@ -76,10 +100,15 @@ jobs:
           PY
 
       - name: Run golden regression
+        env:
+          PRONOUNCEX_TTS_REDIS_URL: ${{ env.REDIS_URL }}
         run: |
           set -eux
           . .venv/bin/activate
+
+          # Ensure the script writes a JSON file
           python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /tmp/golden.json
+
           cp /tmp/golden.json golden.json
           ls -la golden.json
 
@@ -119,3 +148,8 @@ jobs:
           tail -n 200 /tmp/px-worker2.log || true
           echo "=== /tmp/px-worker2.log (tail) ==="
           tail -n 200 /tmp/px-worker2.log || true
+
+      - name: Cleanup containers
+        if: always()
+        run: |
+          docker rm -f px-redis >/dev/null 2>&1 || true
