@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sanity: docker present
+      - name: "Sanity: docker present"
         run: |
           set -eux
           command -v docker
