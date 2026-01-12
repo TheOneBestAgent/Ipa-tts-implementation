@@ -4,16 +4,16 @@ on:
   push:
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
     env:
       PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
-
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - uses: actions/checkout@v4
