@@ -4,101 +4,81 @@ on:
   push:
   pull_request:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
-    # If you're using host Redis instead, remove this services block
-    # and set PRONOUNCEX_TTS_REDIS_URL to 127.0.0.1 below.
-    services:
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 30
-
-    env:
-      # If you keep the redis service container AND your API runs on the host,
-      # "redis" hostname may NOT resolve from the host.
-      #
-      # Recommended: use host redis:
-      # PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
-      #
-      # If you *know* your host can reach the service container by name, keep this:
-      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
-      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Docker sanity
+      - name: Host sanity
         run: |
           set -euxo pipefail
-          command -v docker
-          docker version
-          docker ps
-
-      - name: Install system deps (python + pip + ffmpeg)
-        run: |
-          set -euxo pipefail
-          sudo apt-get update
-          sudo apt-get install -y \
-            python3 \
-            python3-pip \
-            python3-venv \
-            python3-dev \
-            build-essential \
-            ffmpeg
-
-      - name: Python sanity
-        run: |
-          set -euxo pipefail
+          uname -a
           python3 --version
           python3 -m pip --version
+          ffmpeg -version | head -n 1
+          docker --version
+          docker ps >/dev/null
 
-      - name: Ensure redis running (host)
+      - name: Start Redis in Docker (no 6379 collision)
         run: |
           set -euxo pipefail
-          # If you already have redis running, this is a no-op.
-          if ! command -v redis-cli >/dev/null 2>&1; then
-            sudo apt-get install -y redis-tools
-          fi
-          if ! redis-cli ping >/dev/null 2>&1; then
-            sudo systemctl start redis-server || true
-            redis-server --daemonize yes || true
-          fi
-          redis-cli ping
+          docker rm -f px-redis >/dev/null 2>&1 || true
 
-      - name: Create venv
+          docker run -d --name px-redis \
+            -p 127.0.0.1:6380:6379 \
+            --health-cmd "redis-cli ping" \
+            --health-interval 2s \
+            --health-timeout 2s \
+            --health-retries 30 \
+            redis:7
+
+          # wait healthy
+          for i in {1..60}; do
+            status="$(docker inspect -f '{{.State.Health.Status}}' px-redis 2>/dev/null || true)"
+            if [[ "$status" == "healthy" ]]; then
+              echo "Redis healthy"
+              break
+            fi
+            sleep 1
+          done
+          [[ "$(docker inspect -f '{{.State.Health.Status}}' px-redis)" == "healthy" ]]
+
+      - name: Set PRONOUNCEX Redis URL (to Docker Redis on 6380)
         run: |
           set -euxo pipefail
-          python3 -m venv .venv
-          . .venv/bin/activate
-          python -m pip install --upgrade pip
+          echo "PRONOUNCEX_TTS_REDIS_URL=redis://127.0.0.1:6380/0" >> "$GITHUB_ENV"
 
-      - name: Install backend deps
+      - name: Create venv + install deps
         working-directory: pronouncex-tts
         run: |
           set -euxo pipefail
-          . ../.venv/bin/activate
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Start API + workers
         run: |
           set -euxo pipefail
 
-          (cd pronouncex-tts && nohup ../.venv/bin/uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+          # kill any leftovers from previous runs
+          pkill -f "uvicorn api\.app:app" || true
+          pkill -f "python -m core\.worker_main" || true
 
-          (cd pronouncex-tts && nohup ../.venv/bin/python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
-          (cd pronouncex-tts && nohup ../.venv/bin/python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+          source pronouncex-tts/.venv/bin/activate
 
-          python3 - <<'PY'
+          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+
+          # Wait for health
+          python - <<'PY'
           import time, urllib.request
           url = "http://127.0.0.1:8000/health"
           last = None
@@ -117,14 +97,14 @@ jobs:
       - name: Run golden regression
         run: |
           set -euxo pipefail
-          . .venv/bin/activate
+          source pronouncex-tts/.venv/bin/activate
           make golden
           cp /tmp/golden.json golden.json
 
       - name: Enforce golden.json checks
         run: |
-          . .venv/bin/activate
-          python - <<'PY'
+          set -euxo pipefail
+          python3 - <<'PY'
           import json
           with open("golden.json", "r", encoding="utf-8") as f:
               data = json.load(f)
@@ -154,6 +134,15 @@ jobs:
           echo "=== /tmp/px-api.log (tail) ==="
           tail -n 200 /tmp/px-api.log || true
           echo "=== /tmp/px-worker1.log (tail) ==="
-          tail -n 200 /tmp/px-worker1.log || true
+          tail -n 200 /tmp/px-worker2.log || true
           echo "=== /tmp/px-worker2.log (tail) ==="
           tail -n 200 /tmp/px-worker2.log || true
+          echo "=== Redis container logs (tail) ==="
+          docker logs --tail 200 px-redis || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          pkill -f "uvicorn api\.app:app" || true
+          pkill -f "python -m core\.worker_main" || true
+          docker rm -f px-redis >/dev/null 2>&1 || true
