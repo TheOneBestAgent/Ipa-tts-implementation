@@ -8,72 +8,58 @@ jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
+    # Run the job inside a Python 3.11 container so we don't depend on Mint's Python.
+    container:
+      image: python:3.11-bookworm
+
     defaults:
       run:
         shell: bash
 
+    env:
+      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Host sanity
+      - name: System deps (ffmpeg + redis + build basics)
         run: |
-          set -euxo pipefail
-          uname -a
-          python3 --version
-          python3 -m pip --version
-          ffmpeg -version | head -n 1
-          docker --version
-          docker ps >/dev/null
+          set -eux
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ffmpeg \
+            redis-server \
+            git \
+            make \
+            ca-certificates
+          rm -rf /var/lib/apt/lists/*
 
-      - name: Start Redis in Docker (no 6379 collision)
+      - name: Start Redis
         run: |
-          set -euxo pipefail
-          docker rm -f px-redis >/dev/null 2>&1 || true
+          set -eux
+          redis-server --daemonize yes
+          # sanity
+          redis-cli ping
 
-          docker run -d --name px-redis \
-            -p 127.0.0.1:6380:6379 \
-            --health-cmd "redis-cli ping" \
-            --health-interval 2s \
-            --health-timeout 2s \
-            --health-retries 30 \
-            redis:7
-
-          # wait healthy
-          for i in {1..60}; do
-            status="$(docker inspect -f '{{.State.Health.Status}}' px-redis 2>/dev/null || true)"
-            if [[ "$status" == "healthy" ]]; then
-              echo "Redis healthy"
-              break
-            fi
-            sleep 1
-          done
-          [[ "$(docker inspect -f '{{.State.Health.Status}}' px-redis)" == "healthy" ]]
-
-      - name: Set PRONOUNCEX Redis URL (to Docker Redis on 6380)
-        run: |
-          set -euxo pipefail
-          echo "PRONOUNCEX_TTS_REDIS_URL=redis://127.0.0.1:6380/0" >> "$GITHUB_ENV"
-
-      - name: Create venv + install deps
+      - name: Install backend deps
         working-directory: pronouncex-tts
         run: |
-          set -euxo pipefail
-          python3 -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
+          set -eux
+          python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
       - name: Start API + workers
         run: |
-          set -euxo pipefail
+          set -eux
 
-          # kill any leftovers from previous runs
-          pkill -f "uvicorn api\.app:app" || true
-          pkill -f "python -m core\.worker_main" || true
+          # Kill anything leftover (should be unnecessary in a fresh container, but safe)
+          pkill -9 -f "uvicorn api\.app:app" || true
+          pkill -9 -f "python -m core\.worker_main" || true
 
-          source pronouncex-tts/.venv/bin/activate
-
+          # Start API (2 uvicorn workers)
           (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+
+          # Start 2 job workers
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
@@ -82,7 +68,7 @@ jobs:
           import time, urllib.request
           url = "http://127.0.0.1:8000/health"
           last = None
-          for _ in range(120):
+          for _ in range(90):
             try:
               with urllib.request.urlopen(url, timeout=2) as r:
                 if r.status == 200:
@@ -96,14 +82,25 @@ jobs:
 
       - name: Run golden regression
         run: |
-          set -euxo pipefail
-          source pronouncex-tts/.venv/bin/activate
-          make golden
-          cp /tmp/golden.json golden.json
+          set -eux
+          # Prefer calling the script directly so we don't depend on host setup.
+          python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000
+
+          # Wherever it writes, copy into workspace for artifact upload.
+          if [[ -f /tmp/golden.json ]]; then
+            cp /tmp/golden.json golden.json
+          elif [[ -f golden.json ]]; then
+            : # already here
+          else
+            echo "golden.json not found" >&2
+            ls -la /tmp || true
+            find . -maxdepth 3 -name "golden.json" -print || true
+            exit 1
+          fi
 
       - name: Enforce golden.json checks
         run: |
-          set -euxo pipefail
+          set -eux
           python3 - <<'PY'
           import json
           with open("golden.json", "r", encoding="utf-8") as f:
@@ -115,7 +112,7 @@ jobs:
               errors.append("perf_pass != true")
           status_end = data.get("status_end") or {}
           if status_end.get("active_jobs") not in (0, "0", None):
-              errors.append(f"status_end.active_jobs != 0 (got {status_end.get('active_jobs')})")
+              errors.append("status_end.active_jobs != 0")
           if errors:
               raise SystemExit("Golden checks failed: " + ", ".join(errors))
           print("Golden checks passed")
@@ -134,15 +131,6 @@ jobs:
           echo "=== /tmp/px-api.log (tail) ==="
           tail -n 200 /tmp/px-api.log || true
           echo "=== /tmp/px-worker1.log (tail) ==="
-          tail -n 200 /tmp/px-worker2.log || true
+          tail -n 200 /tmp/px-worker1.log || true
           echo "=== /tmp/px-worker2.log (tail) ==="
           tail -n 200 /tmp/px-worker2.log || true
-          echo "=== Redis container logs (tail) ==="
-          docker logs --tail 200 px-redis || true
-
-      - name: Cleanup
-        if: always()
-        run: |
-          pkill -f "uvicorn api\.app:app" || true
-          pkill -f "python -m core\.worker_main" || true
-          docker rm -f px-redis >/dev/null 2>&1 || true
