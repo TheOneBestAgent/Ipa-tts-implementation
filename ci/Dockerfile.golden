@@ -19,5 +19,11 @@ COPY pronouncex-tts/requirements.txt /repo/pronouncex-tts/requirements.txt
 RUN python -m pip install --upgrade pip setuptools wheel \
   && pip install -r /repo/pronouncex-tts/requirements.txt
 
+# Force CPU-only PyTorch wheels if torch is installed in the container.
+RUN python -m pip uninstall -y torch torchvision torchaudio || true \
+  && python -m pip freeze | grep -i '^nvidia-' | cut -d= -f1 | xargs -r python -m pip uninstall -y \
+  && python -m pip install --index-url https://download.pytorch.org/whl/cpu \
+    "torch==2.4.1+cpu" "torchvision==0.19.1+cpu" "torchaudio==2.4.1+cpu"
+
 # Copy repo last (so edits don’t bust dependency cache)
 COPY . /repo
