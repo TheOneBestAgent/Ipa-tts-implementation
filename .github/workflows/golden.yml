@@ -78,23 +78,7 @@ jobs:
               (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
               (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
-              python - <<PY
-import time
-import urllib.request
-
-url = "http://127.0.0.1:8000/health"
-last = None
-for _ in range(180):
-    try:
-        with urllib.request.urlopen(url, timeout=2) as r:
-            if r.status == 200:
-                print("API healthy")
-                raise SystemExit(0)
-    except Exception as e:
-        last = e
-        time.sleep(1)
-raise RuntimeError(f"API not healthy: {last}")
-PY
+              python -c "code = \"\"\"import time\nimport urllib.request\n\nurl = \\\"http://127.0.0.1:8000/health\\\"\nlast = None\nfor _ in range(180):\n    try:\n        with urllib.request.urlopen(url, timeout=2) as r:\n            if r.status == 200:\n                print(\\\"API healthy\\\")\n                raise SystemExit(0)\n    except Exception as e:\n        last = e\n        time.sleep(1)\nraise RuntimeError(f\\\"API not healthy: {last}\\\")\n\"\"\"; exec(code)"
 
               python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /repo/golden.json
 
