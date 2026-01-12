@@ -76,15 +76,16 @@ jobs:
             -w /repo \
             px-golden:py311 \
             bash -lc '
-              set -eux
+              set -euo pipefail
 
               log_fail() {
-                echo "=== /tmp/px-api.log (tail) ==="
-                tail -n 200 /tmp/px-api.log || true
-                echo "=== /tmp/px-worker1.log (tail) ==="
-                tail -n 200 /tmp/px-worker1.log || true
-                echo "=== /tmp/px-worker2.log (tail) ==="
-                tail -n 200 /tmp/px-worker2.log || true
+                for log in /tmp/px-api.log /tmp/px-worker1.log /tmp/px-worker2.log; do
+                  if [[ -f "$log" ]]; then
+                    echo "=== ${log} (tail) ==="
+                    tail -n 200 "$log" || true
+                    cp "$log" "/repo/$(basename "$log")" || true
+                  fi
+                done
               }
               trap "rc=\$?; if [[ \$rc -ne 0 ]]; then log_fail; fi" EXIT
 
@@ -102,9 +103,16 @@ jobs:
               kill -0 "$worker1_pid" || { echo "worker1 exited early"; exit 1; }
               kill -0 "$worker2_pid" || { echo "worker2 exited early"; exit 1; }
 
-              python -c "code = \"\"\"import time\nimport urllib.request\n\nurl = \\\"http://127.0.0.1:8000/health\\\"\nlast = None\nfor _ in range(180):\n    try:\n        with urllib.request.urlopen(url, timeout=2) as r:\n            if r.status == 200:\n                print(\\\"API healthy\\\")\n                raise SystemExit(0)\n    except Exception as e:\n        last = e\n        time.sleep(1)\nraise RuntimeError(f\\\"API not healthy: {last}\\\")\n\"\"\"; exec(code)"
+              for i in {1..180}; do
+                if curl -fsS http://127.0.0.1:8000/health >/dev/null; then
+                  echo "API healthy"
+                  break
+                fi
+                sleep 1
+              done
+              curl -fsS http://127.0.0.1:8000/health >/dev/null || { echo "API not healthy"; exit 1; }
 
-              python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --out-json /repo/golden.json
+              python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --out-json /repo/golden.json --baseline-mode strict
 
               cp /tmp/px-api.log /repo/px-api.log || true
               cp /tmp/px-worker1.log /repo/px-worker1.log || true

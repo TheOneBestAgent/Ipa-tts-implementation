@@ -28,7 +28,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import Any, Dict, Optional, Tuple, List
+from typing import Any, Dict, Optional, Tuple, List, Set
 
 
 @dataclass
@@ -156,18 +156,18 @@ def assert_true(cond: bool, msg: str) -> None:
         raise AssertionError(msg)
 
 
-def _load_baseline(path: str) -> Dict[str, float]:
+def _load_baseline(path: str) -> Tuple[Dict[str, float], Optional[str]]:
     if not path:
-        return {}
+        return {}, "baseline path not set"
     if not os.path.exists(path):
         print(f"WARNING: baseline file not found: {path}")
-        return {}
+        return {}, f"baseline file not found: {path}"
     try:
         with open(path, "r", encoding="utf-8") as handle:
             payload = json.load(handle)
     except Exception as exc:
         print(f"WARNING: failed to read baseline file {path}: {exc}")
-        return {}
+        return {}, f"failed to read baseline file {path}: {exc}"
 
     baseline: Dict[str, float] = {}
     tests = payload.get("tests") if isinstance(payload, dict) else None
@@ -187,7 +187,7 @@ def _load_baseline(path: str) -> Dict[str, float]:
         for name, timing in payload.items():
             if isinstance(name, str) and timing is not None:
                 baseline[name] = float(timing)
-    return baseline
+    return baseline, None
 
 
 def _write_baseline(path: str, summary: Dict[str, Any]) -> None:
@@ -239,6 +239,34 @@ def _evaluate_perf(
                 }
             )
     return failures, skipped
+
+
+def _perf_test_names(summary: Dict[str, Any]) -> Set[str]:
+    names: Set[str] = set()
+    for test in summary.get("tests", []):
+        name = test.get("name")
+        timing = test.get("timing_submit_to_complete_s")
+        if isinstance(name, str) and timing is not None:
+            names.add(name)
+    return names
+
+
+def _validate_baseline(
+    summary: Dict[str, Any],
+    baseline: Dict[str, float],
+    baseline_error: Optional[str],
+) -> None:
+    expected = _perf_test_names(summary)
+    if baseline_error:
+        if expected:
+            raise RuntimeError(baseline_error)
+        return
+    missing = sorted(expected - set(baseline.keys()))
+    extra = sorted(set(baseline.keys()) - expected)
+    if missing:
+        raise RuntimeError(f"baseline missing tests: {missing}")
+    if extra:
+        raise RuntimeError(f"baseline has tests not in run: {extra}")
 
 
 def _git_meta() -> Dict[str, Any]:
@@ -533,6 +561,8 @@ def run_multi_segment_test(api_base: str, model: str, prefer_phonemes: bool, tim
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    event_name = os.getenv("GITHUB_EVENT_NAME", "").lower()
+    baseline_mode_default = "strict" if event_name == "pull_request" else "warn"
     ap.add_argument("--api-base", default=os.getenv("API_BASE", "http://127.0.0.1:8000"))
     ap.add_argument("--web-base", default=os.getenv("WEB_BASE", ""))
     ap.add_argument("--timeout-health", type=float, default=30.0)
@@ -540,6 +570,11 @@ def main() -> int:
     ap.add_argument("--model", default=os.getenv("PX_MODEL", "default"))
     ap.add_argument("--prefer-phonemes", action="store_true", default=True)
     ap.add_argument("--baseline", default=os.getenv("GOLDEN_BASELINE", "artifacts/golden_baseline.json"))
+    ap.add_argument(
+        "--baseline-mode",
+        choices=("warn", "strict"),
+        default=os.getenv("GOLDEN_BASELINE_MODE", baseline_mode_default),
+    )
     ap.add_argument("--perf-multiplier", type=float, default=1.5)
     ap.add_argument("--perf-add-seconds", type=float, default=3.0)
     ap.add_argument("--update-baseline", action="store_true")
@@ -694,10 +729,12 @@ def main() -> int:
             }
         )
 
-        baseline = _load_baseline(args.baseline)
+        baseline, baseline_error = _load_baseline(args.baseline)
         if args.update_baseline:
             _write_baseline(args.baseline, summary)
         else:
+            if args.baseline_mode == "strict":
+                _validate_baseline(summary, baseline, baseline_error)
             perf_failures, perf_skipped = _evaluate_perf(
                 summary,
                 baseline=baseline,
