@@ -12,6 +12,8 @@ jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
+    # If you're using host Redis instead, remove this services block
+    # and set PRONOUNCEX_TTS_REDIS_URL to 127.0.0.1 below.
     services:
       redis:
         image: redis:7
@@ -22,8 +24,14 @@ jobs:
           --health-retries 30
 
     env:
-      # For service container networking, keep this as redis:6379
-      PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
+      # If you keep the redis service container AND your API runs on the host,
+      # "redis" hostname may NOT resolve from the host.
+      #
+      # Recommended: use host redis:
+      # PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
+      #
+      # If you *know* your host can reach the service container by name, keep this:
+      PRONOUNCEX_TTS_REDIS_URL: redis://127.0.0.1:6379/0
       PYTHONUNBUFFERED: "1"
 
     steps:
@@ -36,33 +44,59 @@ jobs:
           docker version
           docker ps
 
+      - name: Install system deps (python + pip + ffmpeg)
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3 \
+            python3-pip \
+            python3-venv \
+            python3-dev \
+            build-essential \
+            ffmpeg
+
       - name: Python sanity
         run: |
           set -euxo pipefail
           python3 --version
           python3 -m pip --version
 
-      - name: Install system deps
+      - name: Ensure redis running (host)
         run: |
           set -euxo pipefail
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          # If you already have redis running, this is a no-op.
+          if ! command -v redis-cli >/dev/null 2>&1; then
+            sudo apt-get install -y redis-tools
+          fi
+          if ! redis-cli ping >/dev/null 2>&1; then
+            sudo systemctl start redis-server || true
+            redis-server --daemonize yes || true
+          fi
+          redis-cli ping
+
+      - name: Create venv
+        run: |
+          set -euxo pipefail
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
 
       - name: Install backend deps
         working-directory: pronouncex-tts
         run: |
           set -euxo pipefail
-          python3 -m pip install --upgrade pip
+          . ../.venv/bin/activate
           pip install -r requirements.txt
 
       - name: Start API + workers
         run: |
           set -euxo pipefail
 
-          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+          (cd pronouncex-tts && nohup ../.venv/bin/uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
 
-          (cd pronouncex-tts && nohup python3 -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
-          (cd pronouncex-tts && nohup python3 -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+          (cd pronouncex-tts && nohup ../.venv/bin/python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+          (cd pronouncex-tts && nohup ../.venv/bin/python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
           python3 - <<'PY'
           import time, urllib.request
@@ -83,12 +117,14 @@ jobs:
       - name: Run golden regression
         run: |
           set -euxo pipefail
+          . .venv/bin/activate
           make golden
           cp /tmp/golden.json golden.json
 
       - name: Enforce golden.json checks
         run: |
-          python3 - <<'PY'
+          . .venv/bin/activate
+          python - <<'PY'
           import json
           with open("golden.json", "r", encoding="utf-8") as f:
               data = json.load(f)
