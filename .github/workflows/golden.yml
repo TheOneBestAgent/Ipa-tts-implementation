@@ -4,17 +4,22 @@ on:
   push:
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
-    # Run all steps inside a Python 3.11 container on your self-hosted runner
     container:
       image: python:3.11-bookworm
 
     services:
       redis:
         image: redis:7
+        ports:
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s
@@ -22,7 +27,6 @@ jobs:
           --health-retries 30
 
     env:
-      # IMPORTANT: inside the container job, Redis is reachable by service name "redis"
       PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
       PYTHONUNBUFFERED: "1"
 
@@ -53,14 +57,11 @@ jobs:
         run: |
           set -euxo pipefail
 
-          # Start API (2 uvicorn workers)
           (cd pronouncex-tts && nohup uvicorn api.app:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
 
-          # Start 2 job workers
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
           (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
-          # Wait for health
           python - <<'PY'
           import time, urllib.request
           url = "http://127.0.0.1:8000/health"
@@ -81,7 +82,6 @@ jobs:
         run: |
           set -euxo pipefail
           make golden
-          # Your suite writes /tmp/golden.json; also keep a copy in workspace for artifacts
           cp /tmp/golden.json golden.json
 
       - name: Enforce golden.json checks
