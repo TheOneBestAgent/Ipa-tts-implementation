@@ -80,7 +80,7 @@ jobs:
 
               python -c "code = \"\"\"import time\nimport urllib.request\n\nurl = \\\"http://127.0.0.1:8000/health\\\"\nlast = None\nfor _ in range(180):\n    try:\n        with urllib.request.urlopen(url, timeout=2) as r:\n            if r.status == 200:\n                print(\\\"API healthy\\\")\n                raise SystemExit(0)\n    except Exception as e:\n        last = e\n        time.sleep(1)\nraise RuntimeError(f\\\"API not healthy: {last}\\\")\n\"\"\"; exec(code)"
 
-              python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /repo/golden.json
+              python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --out-json /repo/golden.json
 
               cp /tmp/px-api.log /repo/px-api.log || true
               cp /tmp/px-worker1.log /repo/px-worker1.log || true
