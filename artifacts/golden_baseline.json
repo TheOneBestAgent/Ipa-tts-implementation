@@ -1,15 +1,206 @@
 {
   "api_base": "http://127.0.0.1:8000",
   "web_base": "",
-  "started_at": "2026-01-12 01:24:04",
-  "tests": [],
-  "pass": false,
+  "started_at": "2026-01-12 17:38:44",
+  "tests": [
+    {
+      "name": "head_transition",
+      "job_id": "e25c79cc5a414a1185740f1fbee89e3a",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "e25c79cc5a414a1185740f1fbee89e3a",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a",
+        "job_url_backend": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a",
+        "job_url_best": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a",
+        "playlist_url_proxy": "/api/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/e25c79cc5a414a1185740f1fbee89e3a/audio.ogg"
+      },
+      "segments_total": 1,
+      "segments_ready": 1,
+      "segments_error": 0,
+      "saw_not_ready": true
+    },
+    {
+      "name": "cancel",
+      "job_id": "3ec791d769434754900a1fd8115a774e",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "3ec791d769434754900a1fd8115a774e",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/3ec791d769434754900a1fd8115a774e",
+        "job_url_backend": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e",
+        "job_url_best": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e",
+        "playlist_url_proxy": "/api/tts/jobs/3ec791d769434754900a1fd8115a774e/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/3ec791d769434754900a1fd8115a774e/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/3ec791d769434754900a1fd8115a774e/audio.ogg"
+      },
+      "segments_total": 3,
+      "segments_ready": 0,
+      "segments_error": 0,
+      "final_status": "canceled",
+      "segments_ready_before_cancel": 0,
+      "segments_ready_after_cancel": 0,
+      "cancel_ack_status": 200,
+      "cancel_latency_ms": 2.883
+    },
+    {
+      "name": "test_1",
+      "job_id": "a20c1b467ca14dc2a905f4136cca2955",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "a20c1b467ca14dc2a905f4136cca2955",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/a20c1b467ca14dc2a905f4136cca2955",
+        "job_url_backend": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955",
+        "job_url_best": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955",
+        "playlist_url_proxy": "/api/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/a20c1b467ca14dc2a905f4136cca2955/audio.ogg"
+      },
+      "timing_submit_to_complete_s": 7.579,
+      "segments_total": 1,
+      "segments_ready": 1,
+      "segments_error": 0
+    },
+    {
+      "name": "test_2",
+      "job_id": "34ab75232dee44c7b6acd4f18ad64689",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "34ab75232dee44c7b6acd4f18ad64689",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/34ab75232dee44c7b6acd4f18ad64689",
+        "job_url_backend": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689",
+        "job_url_best": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689",
+        "playlist_url_proxy": "/api/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/34ab75232dee44c7b6acd4f18ad64689/audio.ogg"
+      },
+      "timing_submit_to_complete_s": 16.706,
+      "segments_total": 1,
+      "segments_ready": 1,
+      "segments_error": 0
+    },
+    {
+      "name": "test_3",
+      "job_id": "102b3d48a33e4d80836a97f2baeb9ddb",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "102b3d48a33e4d80836a97f2baeb9ddb",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb",
+        "job_url_backend": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb",
+        "job_url_best": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb",
+        "playlist_url_proxy": "/api/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/102b3d48a33e4d80836a97f2baeb9ddb/audio.ogg"
+      },
+      "timing_submit_to_complete_s": 44.577,
+      "segments_total": 1,
+      "segments_ready": 1,
+      "segments_error": 0
+    },
+    {
+      "name": "multi_segment",
+      "job_id": "1bfa32653995468da36b7f5e7fe372dd",
+      "submit_meta": {
+        "submit_endpoint": "reader/synthesize",
+        "job_id": "1bfa32653995468da36b7f5e7fe372dd",
+        "status": "queued",
+        "job_url_proxy": "/api/tts/jobs/1bfa32653995468da36b7f5e7fe372dd",
+        "job_url_backend": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd",
+        "job_url_best": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd",
+        "playlist_url_proxy": "/api/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/playlist.json",
+        "playlist_url_backend": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/playlist.json",
+        "playlist_url_best": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/playlist.json",
+        "merged_audio_url_proxy": "/api/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/audio.ogg",
+        "merged_audio_url_backend": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/audio.ogg",
+        "merged_audio_url_best": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/audio.ogg",
+        "playlist_url": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/playlist.json",
+        "merged_audio_url": "/v1/tts/jobs/1bfa32653995468da36b7f5e7fe372dd/audio.ogg"
+      },
+      "timing_submit_to_complete_s": 232.829,
+      "segments_total": 10,
+      "segments_ready": 10,
+      "segments_error": 0,
+      "checked_segments": [
+        "first",
+        "last"
+      ],
+      "first_segment_id": "7e49525c9a3e472592911e6cc076aa2d",
+      "last_segment_id": "6162b69a424e433fb81a510d8f52e62b"
+    }
+  ],
+  "pass": true,
   "perf_pass": true,
   "perf_failures": [],
-  "git_commit": "9b2ef7a31de4a0b3f488b8b3ef9e8ca5f79f020f",
-  "git_dirty": false,
-  "settings_digest": "b3cd6a2f9fb3488a2cf42e1235f73352958650e3fc6b215aefa839e18cd3e0c4",
-  "timing_total_s": 30.032,
-  "error": "RuntimeError: API not healthy in 30.0s; last=(0, b'<urlopen error [Errno 111] Connection refused>')",
-  "status_end": null
+  "git_commit": null,
+  "git_dirty": null,
+  "settings_digest": "c675050d335762602eb3ab82e9694f35106399529d947ce3f62d288de3f4bcc3",
+  "status_start": {
+    "workers_online": 0,
+    "queue_len": 0,
+    "active_jobs": 0,
+    "retry_counts": {
+      "segment_retries": 0,
+      "retry_caps": 0
+    },
+    "fallback_model_usage": 0,
+    "merge_lock_contention": {
+      "wait_count": 0,
+      "wait_total_ms": 0.0,
+      "wait_max_ms": 0.0
+    },
+    "stale_queued_cancels": 0
+  },
+  "perf_skipped": [
+    "test_1",
+    "test_2",
+    "test_3",
+    "multi_segment"
+  ],
+  "timing_total_s": 346.144,
+  "status_end": {
+    "workers_online": 2,
+    "queue_len": 0,
+    "active_jobs": 0,
+    "retry_counts": {
+      "segment_retries": 0,
+      "retry_caps": 0
+    },
+    "fallback_model_usage": 0,
+    "merge_lock_contention": {
+      "wait_count": 3,
+      "wait_total_ms": 0.975,
+      "wait_max_ms": 0.379
+    },
+    "stale_queued_cancels": 0
+  }
 }

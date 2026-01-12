@@ -23,7 +23,7 @@ pnpm-debug.log*
 .idea/
 
 # Project artifacts / caches
-artifacts/
+artifacts/*
 !artifacts/golden_baseline.json
 pronouncex-tts/data/cache/
 pronouncex-tts/data/tmp/
