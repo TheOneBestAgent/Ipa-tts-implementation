@@ -16,22 +16,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sanity tools present
+      - name: Sanity: docker present
         run: |
           set -eux
-          command -v python3
-          python3 --version
           command -v docker
           docker version
           docker ps
 
-      - name: Start redis (docker)
+      - name: Create docker network
+        run: |
+          set -eux
+          docker network create px-ci >/dev/null 2>&1 || true
+
+      - name: Start redis (no host port bind)
         run: |
           set -eux
           docker rm -f px-redis >/dev/null 2>&1 || true
-          REDIS_PORT=6380
           docker run -d --name px-redis \
-            -p ${REDIS_PORT}:6379 \
+            --network px-ci \
+            --network-alias redis \
             --health-cmd "redis-cli ping" \
             --health-interval 2s \
             --health-timeout 2s \
@@ -48,76 +51,100 @@ jobs:
           done
 
           test "$(docker inspect -f '{{.State.Health.Status}}' px-redis)" = "healthy"
-          echo "REDIS_URL=redis://127.0.0.1:${REDIS_PORT}/0" >> "$GITHUB_ENV"
 
-      - name: Create venv + install deps
+      - name: Build golden runner image (Python 3.11)
         run: |
           set -eux
-          python3 -m venv .venv
-          . .venv/bin/activate
-          python -m ensurepip --upgrade || true
-          python -m pip install --upgrade pip setuptools wheel
-          cd pronouncex-tts
-          pip install -r requirements.txt
+          docker build -f ci/Dockerfile.golden -t px-golden:py311 .
 
-      - name: Start API + workers
+      - name: Run golden inside container
         env:
-          PRONOUNCEX_TTS_REDIS_URL: ${{ env.REDIS_URL }}
+          PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
         run: |
           set -eux
-          . .venv/bin/activate
 
-          pkill -9 -f "uvicorn api\.app:app" || true
-          pkill -9 -f "python -m core\.worker_main" || true
+          # Clean old container if any
+          docker rm -f px-golden-run >/dev/null 2>&1 || true
 
-          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
-          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
-          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+          docker run --name px-golden-run \
+            --network px-ci \
+            -e PRONOUNCEX_TTS_REDIS_URL="${PRONOUNCEX_TTS_REDIS_URL}" \
+            -v "${PWD}:/repo" \
+            -w /repo \
+            px-golden:py311 \
+            bash -lc '
+              set -eux
 
-          python - <<'PY'
-          import time, urllib.request
-          url = "http://127.0.0.1:8000/health"
-          last = None
-          for _ in range(120):
-            try:
-              with urllib.request.urlopen(url, timeout=2) as r:
-                if r.status == 200:
-                  print("API healthy")
-                  raise SystemExit(0)
-            except Exception as e:
-              last = e
-              time.sleep(1)
-          raise RuntimeError(f"API not healthy: {last}")
+              # Start API + workers in-container
+              pkill -9 -f "uvicorn api\.app:app" || true
+              pkill -9 -f "python -m core\.worker_main" || true
+
+              (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+              (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+              (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+
+              # Wait for API health
+              python - <<PY
+              import time, urllib.request
+              url="http://127.0.0.1:8000/health"
+              last=None
+              for _ in range(180):
+                  try:
+                      with urllib.request.urlopen(url, timeout=2) as r:
+                          if r.status == 200:
+                              print("API healthy")
+                              raise SystemExit(0)
+                  except Exception as e:
+                      last=e
+                      time.sleep(1)
+              raise RuntimeError(f"API not healthy: {last}")
+              PY
+
+              # Run golden and write golden.json into the repo workspace
+              python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /repo/golden.json
+
+              # Copy logs back too (super useful on failure)
+              cp /tmp/px-api.log /repo/px-api.log || true
+              cp /tmp/px-worker1.log /repo/px-worker1.log || true
+              cp /tmp/px-worker2.log /repo/px-worker2.log || true
+
+              ls -la /repo/golden.json
+            '
+
+      - name: Enforce golden.json checks
+        run: |
+          set -eux
+          python3 - <<'PY'
+          import json
+          with open("golden.json","r",encoding="utf-8") as f:
+              data=json.load(f)
+          errors=[]
+          if data.get("pass") is not True:
+              errors.append("pass != true")
+          if data.get("perf_pass") is not True:
+              errors.append("perf_pass != true")
+          status_end=data.get("status_end") or {}
+          if status_end.get("active_jobs") not in (0, "0", None):
+              errors.append(f"status_end.active_jobs != 0 (got {status_end.get('active_jobs')})")
+          if errors:
+              raise SystemExit("Golden checks failed: " + ", ".join(errors))
+          print("Golden checks passed")
           PY
 
-      - name: Run golden regression
-        env:
-          PRONOUNCEX_TTS_REDIS_URL: ${{ env.REDIS_URL }}
-        run: |
-          set -eux
-          . .venv/bin/activate
-          python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /tmp/golden.json
-          cp /tmp/golden.json golden.json
-          ls -la golden.json
-
-      - name: Upload golden.json
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: golden-json
-          path: golden.json
-          if-no-files-found: error
-
-      - name: Dump logs on failure
-        if: failure()
-        run: |
-          echo "=== /tmp/px-api.log (tail) ==="
-          tail -n 200 /tmp/px-api.log || true
-          echo "=== /tmp/px-worker1.log (tail) ==="
-          tail -n 200 /tmp/px-worker1.log || true
-          echo "=== /tmp/px-worker2.log (tail) ==="
-          tail -n 200 /tmp/px-worker2.log || true
+          name: golden-artifacts
+          path: |
+            golden.json
+            px-api.log
+            px-worker1.log
+            px-worker2.log
+          if-no-files-found: warn
 
       - name: Cleanup
         if: always()
         run: |
+          docker rm -f px-golden-run >/dev/null 2>&1 || true
           docker rm -f px-redis >/dev/null 2>&1 || true
+          docker network rm px-ci >/dev/null 2>&1 || true

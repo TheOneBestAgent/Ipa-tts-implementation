@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /repo
+
+# System deps commonly needed for audio + TTS tooling
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    espeak-ng \
+    libsndfile1 \
+    build-essential \
+    git \
+    curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# Pre-copy only requirements first to maximize docker layer cache
+COPY pronouncex-tts/requirements.txt /repo/pronouncex-tts/requirements.txt
+
+RUN python -m pip install --upgrade pip setuptools wheel \
+  && pip install -r /repo/pronouncex-tts/requirements.txt
+
+# Copy repo last (so edits don’t bust dependency cache)
+COPY . /repo
