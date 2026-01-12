@@ -63,7 +63,6 @@ jobs:
         run: |
           set -eux
 
-          # Clean old container if any
           docker rm -f px-golden-run >/dev/null 2>&1 || true
 
           docker run --name px-golden-run \
@@ -75,15 +74,10 @@ jobs:
             bash -lc '
               set -eux
 
-              # Start API + workers in-container
-              pkill -9 -f "uvicorn api\.app:app" || true
-              pkill -9 -f "python -m core\.worker_main" || true
-
               (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
               (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
               (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
-              # Wait for API health
               python - <<PY
               import time, urllib.request
               url="http://127.0.0.1:8000/health"
@@ -100,10 +94,8 @@ jobs:
               raise RuntimeError(f"API not healthy: {last}")
               PY
 
-              # Run golden and write golden.json into the repo workspace
               python3 scripts/golden_regression.py --api-base http://127.0.0.1:8000 --json-out /repo/golden.json
 
-              # Copy logs back too (super useful on failure)
               cp /tmp/px-api.log /repo/px-api.log || true
               cp /tmp/px-worker1.log /repo/px-worker1.log || true
               cp /tmp/px-worker2.log /repo/px-worker2.log || true
