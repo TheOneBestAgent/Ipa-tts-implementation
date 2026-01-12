@@ -12,13 +12,9 @@ jobs:
   golden:
     runs-on: [self-hosted, docker, pronouncex]
 
-    container:
-      image: python:3.11-bookworm
-
     services:
       redis:
         image: redis:7
-        # NOTE: no ports mapping on self-hosted (avoids host 6379 conflicts)
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s
@@ -26,6 +22,7 @@ jobs:
           --health-retries 30
 
     env:
+      # For service container networking, keep this as redis:6379
       PRONOUNCEX_TTS_REDIS_URL: redis://redis:6379/0
       PYTHONUNBUFFERED: "1"
 
@@ -35,32 +32,39 @@ jobs:
       - name: Docker sanity
         run: |
           set -euxo pipefail
+          command -v docker
           docker version
           docker ps
+
+      - name: Python sanity
+        run: |
+          set -euxo pipefail
+          python3 --version
+          python3 -m pip --version
 
       - name: Install system deps
         run: |
           set -euxo pipefail
-          apt-get update
-          apt-get install -y --no-install-recommends ffmpeg curl
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: Install backend deps
         working-directory: pronouncex-tts
         run: |
           set -euxo pipefail
-          python -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Start API + workers
         run: |
           set -euxo pipefail
 
-          (cd pronouncex-tts && nohup uvicorn api.app:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
+          (cd pronouncex-tts && nohup uvicorn api.app:app --host 127.0.0.1 --port 8000 --workers 2 --log-level info > /tmp/px-api.log 2>&1 &)
 
-          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
-          (cd pronouncex-tts && nohup python -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
+          (cd pronouncex-tts && nohup python3 -m core.worker_main > /tmp/px-worker1.log 2>&1 &)
+          (cd pronouncex-tts && nohup python3 -m core.worker_main > /tmp/px-worker2.log 2>&1 &)
 
-          python - <<'PY'
+          python3 - <<'PY'
           import time, urllib.request
           url = "http://127.0.0.1:8000/health"
           last = None
@@ -84,24 +88,20 @@ jobs:
 
       - name: Enforce golden.json checks
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           import json
           with open("golden.json", "r", encoding="utf-8") as f:
               data = json.load(f)
-
           errors = []
           if data.get("pass") is not True:
               errors.append("pass != true")
           if data.get("perf_pass") is not True:
               errors.append("perf_pass != true")
-
           status_end = data.get("status_end") or {}
           if status_end.get("active_jobs") not in (0, "0", None):
               errors.append(f"status_end.active_jobs != 0 (got {status_end.get('active_jobs')})")
-
           if errors:
               raise SystemExit("Golden checks failed: " + ", ".join(errors))
-
           print("Golden checks passed")
           PY
 
