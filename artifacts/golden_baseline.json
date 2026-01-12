@@ -1,0 +1,15 @@
+{
+  "api_base": "http://127.0.0.1:8000",
+  "web_base": "",
+  "started_at": "2026-01-12 01:24:04",
+  "tests": [],
+  "pass": false,
+  "perf_pass": true,
+  "perf_failures": [],
+  "git_commit": "9b2ef7a31de4a0b3f488b8b3ef9e8ca5f79f020f",
+  "git_dirty": false,
+  "settings_digest": "b3cd6a2f9fb3488a2cf42e1235f73352958650e3fc6b215aefa839e18cd3e0c4",
+  "timing_total_s": 30.032,
+  "error": "RuntimeError: API not healthy in 30.0s; last=(0, b'<urlopen error [Errno 111] Connection refused>')",
+  "status_end": null
+}

@@ -11,6 +11,10 @@ jobs:
     defaults:
       run:
         shell: bash
+    env:
+      NET: px-ci-${{ github.run_id }}
+      REDIS: px-redis-${{ github.run_id }}
+      RUN: px-golden-run-${{ github.run_id }}
 
     steps:
       - name: Checkout
@@ -26,14 +30,14 @@ jobs:
       - name: Create docker network
         run: |
           set -eux
-          docker network create px-ci >/dev/null 2>&1 || true
+          docker network create "$NET" >/dev/null 2>&1 || true
 
       - name: Start redis (no host port bind)
         run: |
           set -eux
-          docker rm -f px-redis >/dev/null 2>&1 || true
-          docker run -d --name px-redis \
-            --network px-ci \
+          docker rm -f "$REDIS" >/dev/null 2>&1 || true
+          docker run -d --name "$REDIS" \
+            --network "$NET" \
             --network-alias redis \
             --health-cmd "redis-cli ping" \
             --health-interval 2s \
@@ -42,7 +46,7 @@ jobs:
             redis:7
 
           for i in {1..60}; do
-            status="$(docker inspect -f '{{.State.Health.Status}}' px-redis 2>/dev/null || true)"
+            status="$(docker inspect -f '{{.State.Health.Status}}' "$REDIS" 2>/dev/null || true)"
             if [[ "$status" == "healthy" ]]; then
               echo "Redis healthy"
               break
@@ -50,7 +54,7 @@ jobs:
             sleep 1
           done
 
-          test "$(docker inspect -f '{{.State.Health.Status}}' px-redis)" = "healthy"
+          test "$(docker inspect -f '{{.State.Health.Status}}' "$REDIS")" = "healthy"
 
       - name: Build golden runner image (Python 3.11)
         run: |
@@ -63,10 +67,10 @@ jobs:
         run: |
           set -eux
 
-          docker rm -f px-golden-run >/dev/null 2>&1 || true
+          docker rm -f "$RUN" >/dev/null 2>&1 || true
 
-          docker run --name px-golden-run \
-            --network px-ci \
+          docker run --name "$RUN" \
+            --network "$NET" \
             -e PRONOUNCEX_TTS_REDIS_URL="${PRONOUNCEX_TTS_REDIS_URL}" \
             -v "${PWD}:/repo" \
             -w /repo \
@@ -130,6 +134,7 @@ jobs:
           PY
 
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: golden-artifacts
@@ -143,6 +148,6 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker rm -f px-golden-run >/dev/null 2>&1 || true
-          docker rm -f px-redis >/dev/null 2>&1 || true
-          docker network rm px-ci >/dev/null 2>&1 || true
+          docker rm -f "$RUN" >/dev/null 2>&1 || true
+          docker rm -f "$REDIS" >/dev/null 2>&1 || true
+          docker network rm "$NET" >/dev/null 2>&1 || true

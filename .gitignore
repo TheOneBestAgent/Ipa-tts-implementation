@@ -24,6 +24,7 @@ pnpm-debug.log*
 
 # Project artifacts / caches
 artifacts/
+!artifacts/golden_baseline.json
 pronouncex-tts/data/cache/
 pronouncex-tts/data/tmp/
 pronouncex-tts/data/merged/
